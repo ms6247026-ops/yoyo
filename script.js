@@ -61,8 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to check and maintain login status
 function checkLoginStatus() {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
     
-    if (user) {
+    if (user || adminLoggedIn) {
         // User is logged in - update navigation and show user-specific elements
         updateNavigationForLoggedInUser();
         
@@ -111,11 +112,57 @@ function updateNavigationForLoggedInUser() {
             });
         }
         
-        // Add dashboard link if not already added
-        if (!document.getElementById('dashboardNav')) {
+        // Add "My Account" link for all logged-in users (both admin and regular users)
+        const existingDashboardNav = document.getElementById('dashboardNav');
+        const existingAdminNav = document.getElementById('adminPanelNav');
+        
+        // Remove admin panel link if it exists (we'll use My Account for everyone)
+        if (existingAdminNav) {
+            existingAdminNav.parentElement.remove();
+        }
+        
+        if (!existingDashboardNav) {
+            // Add My Account link if it doesn't exist
             const dashboardLi = document.createElement('li');
             dashboardLi.innerHTML = '<a href="dashboard.html" id="dashboardNav"><i class="fas fa-user-circle"></i> My Account</a>';
             nav.appendChild(dashboardLi);
+            
+            // Add click handler to check if admin and redirect accordingly
+            const dashboardNav = document.getElementById('dashboardNav');
+            if (dashboardNav) {
+                dashboardNav.addEventListener('click', function(e) {
+                    const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+                    const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+                    const isAdmin = (currentUser && currentUser.role === 'admin') || adminLoggedIn;
+                    
+                    if (isAdmin) {
+                        e.preventDefault();
+                        window.location.href = 'admin.html';
+                    }
+                    // If not admin, let the default link behavior work (goes to dashboard.html)
+                });
+            }
+        } else {
+            // Update existing link's click handler
+            const dashboardNav = document.getElementById('dashboardNav');
+            if (dashboardNav) {
+                // Remove old event listeners by cloning and replacing
+                const newNav = dashboardNav.cloneNode(true);
+                dashboardNav.parentNode.replaceChild(newNav, dashboardNav);
+                
+                // Add new click handler
+                newNav.addEventListener('click', function(e) {
+                    const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+                    const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+                    const isAdmin = (currentUser && currentUser.role === 'admin') || adminLoggedIn;
+                    
+                    if (isAdmin) {
+                        e.preventDefault();
+                        window.location.href = 'admin.html';
+                    }
+                    // If not admin, let the default link behavior work (goes to dashboard.html)
+                });
+            }
         }
         
         // Add logout functionality if not already added

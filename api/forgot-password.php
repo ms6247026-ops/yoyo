@@ -70,7 +70,7 @@ try {
         require_once __DIR__ . '/../config/phpmailer.php';
         
         $mail = getPHPMailer();
-        $mail->setFrom('your-email@gmail.com', 'Next Inn');
+        $mail->setFrom(getSMTPFromEmail(), getSMTPFromName());
         $mail->addAddress($email, $user['first_name'] . ' ' . $user['last_name']);
         $mail->Subject = 'Password Reset OTP - Next Inn';
         $mail->Body = "

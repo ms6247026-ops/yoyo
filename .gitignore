@@ -27,6 +27,9 @@ error_log
 # Razorpay keys (keep keys secure - add your actual keys here)
 # config/razorpay.php
 
+# SMTP credentials (keep credentials secure)
+# config/smtp.php
+
 # Composer (if you use it)
 vendor/
 composer.lock

@@ -102,6 +102,15 @@ nav ul li a:hover, nav ul li a.active {
     color: var(--accent-color);
 }
 
+#adminPanelNav {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+#adminPanelNav:hover {
+    color: #c0392b;
+}
+
 #logoutNav {
     color: var(--accent-color);
 }
