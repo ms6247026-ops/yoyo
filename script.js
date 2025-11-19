@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', initSlideshow);
 // Check and maintain login status across all pages
 document.addEventListener('DOMContentLoaded', function() {
     checkLoginStatus();
+    initializeBookNowButtons();
 });
 
 // Function to check and maintain login status
@@ -484,8 +485,18 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (data.data.bookings) {
                                 localStorage.setItem('bookings', JSON.stringify(data.data.bookings));
                             }
-                            alert('Login successful! Redirecting to your account...');
-                            window.location.href = 'dashboard.html';
+                            
+                            // Check if there's a return URL parameter
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const returnUrl = urlParams.get('return');
+                            
+                            if (returnUrl) {
+                                // Redirect to the return URL (e.g., booking.html)
+                                window.location.href = decodeURIComponent(returnUrl);
+                            } else {
+                                alert('Login successful! Redirecting to your account...');
+                                window.location.href = 'dashboard.html';
+                            }
                         }
                     } else {
                         alert('Login failed: ' + data.error);
@@ -1596,6 +1607,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Initialize Book Now buttons on homepage
+function initializeBookNowButtons() {
+    // Hero section Book Now button
+    const heroBookNowBtn = document.getElementById('heroBookNowBtn');
+    if (heroBookNowBtn) {
+        heroBookNowBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleBookNowClick();
+        });
+    }
+    
+    // CTA section Reserve Now button
+    const ctaReserveNowBtn = document.getElementById('ctaReserveNowBtn');
+    if (ctaReserveNowBtn) {
+        ctaReserveNowBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleBookNowClick();
+        });
+    }
+}
+
+// Handle Book Now button click - check login status
+function handleBookNowClick() {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    
+    if (user || adminLoggedIn) {
+        // User is logged in - redirect to booking page
+        window.location.href = 'booking.html';
+    } else {
+        // User is not logged in - redirect to login page with return URL
+        const returnUrl = encodeURIComponent('booking.html');
+        window.location.href = `login.html?return=${returnUrl}`;
+    }
+}
 
 // Add login-page class to body on login and register pages
 document.addEventListener('DOMContentLoaded', function() {
