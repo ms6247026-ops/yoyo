@@ -293,20 +293,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     const totalAmount = parseFloat(selectedRoom.price_per_night) * nights;
                     
                     // Create booking first (with pending status)
-                    const bookingResponse = await fetch('api/booking.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${user.id}`
-                        },
-                        body: JSON.stringify({
-                            room_id: selectedRoom.id,
-                            check_in_date: checkIn,
-                            check_out_date: checkOut,
-                            number_of_guests: parseInt(guests),
-                            special_requests: specialRequests
-                        })
-                    });
+            const bookingResponse = await fetch('api/booking.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.id}`
+                },
+                body: JSON.stringify({
+                    room_id: selectedRoom.id,
+                    check_in_date: checkIn,
+                    check_out_date: checkOut,
+                    number_of_guests: parseInt(guests),
+                    special_requests: specialRequests
+                })
+            });
                     
                     const bookingData = await bookingResponse.json();
                     
@@ -378,8 +378,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const verifyData = await verifyResponse.json();
                                 
                                 if (verifyData.success) {
-                                    // Update user's booking data in localStorage
-                                    const currentBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                        // Update user's booking data in localStorage
+                        const currentBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
                                     // Reload bookings to get updated status
                                     const updatedBookingsResponse = await fetch('api/booking.php', {
                                         headers: {
@@ -396,13 +396,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     setTimeout(() => {
                                         const viewBookings = confirm('Booking confirmed! Click OK to view your bookings.');
-                                        if (viewBookings) {
-                                            window.location.href = 'dashboard.html';
-                                        } else {
-                                            this.reset();
-                                        }
+                        if (viewBookings) {
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            this.reset();
+                        }
                                     }, 1000);
-                                } else {
+                    } else {
                                     throw new Error(verifyData.error || 'Payment verification failed');
                                 }
                             } catch (error) {
@@ -1290,8 +1290,11 @@ function openRoomModal(roomType) {
 // Close room modal
 function closeRoomModal() {
     const modal = document.getElementById('roomModal');
+    if (modal) {
     modal.classList.remove('active');
+        modal.style.display = 'none';
     document.body.style.overflow = '';
+    }
 }
 
 // Change modal image (navigation)
@@ -1373,8 +1376,11 @@ function displayRooms(rooms) {
         const floorText = getFloorText(room.floor_number);
         const price = parseFloat(room.price_per_night || 0).toLocaleString('en-IN');
         
+        // Store room data as JSON in data attribute for easy access
+        const roomDataJson = JSON.stringify(room).replace(/"/g, '&quot;');
+        
         return `
-            <div class="room-item" data-room-id="${room.id}">
+            <div class="room-item" data-room-id="${room.id}" data-room-data="${roomDataJson}">
                 <div class="room-item-image">
                     <img src="${imageUrl}" alt="${room.room_name}" onerror="this.src='images/default-room.jpg'">
                     <div class="room-overlay">
@@ -1393,14 +1399,52 @@ function displayRooms(rooms) {
     // Add click handlers to room items
     const roomItems = document.querySelectorAll('.room-item');
     roomItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const roomId = parseInt(this.getAttribute('data-room-id'));
-            const room = roomsFromDatabase.find(r => r.id === roomId);
-            if (room) {
-                openRoomModalFromDatabase(room);
+        item.addEventListener('click', function(e) {
+            // Don't trigger if clicking on the view gallery button
+            if (e.target.closest('.view-gallery-btn')) {
+                return;
+            }
+            
+            // Get room data from data attribute
+            const roomDataAttr = this.getAttribute('data-room-data');
+            if (roomDataAttr) {
+                try {
+                    const room = JSON.parse(roomDataAttr.replace(/&quot;/g, '"'));
+                    console.log('Opening modal for room:', room); // Debug
+                    openRoomModalFromDatabase(room);
+                } catch (error) {
+                    console.error('Error parsing room data:', error);
+                    // Fallback: try to find by ID
+                    const roomId = parseInt(this.getAttribute('data-room-id'));
+                    const room = roomsFromDatabase.find(r => {
+                        const dbId = parseInt(r.id);
+                        return dbId === roomId || r.id === roomId || r.id == roomId;
+                    });
+                    if (room) {
+                        openRoomModalFromDatabase(room);
+                    } else {
+                        alert('Room information not available. Please refresh the page.');
+                    }
+                }
+            } else {
+                // Fallback: try to find by ID
+                const roomId = parseInt(this.getAttribute('data-room-id'));
+                const room = roomsFromDatabase.find(r => {
+                    const dbId = parseInt(r.id);
+                    return dbId === roomId || r.id === roomId || r.id == roomId;
+                });
+                if (room) {
+                    openRoomModalFromDatabase(room);
+                } else {
+                    console.error('Room not found with ID:', roomId);
+                    alert('Room information not available. Please refresh the page.');
+                }
             }
         });
     });
+    
+    console.log('Room items click handlers attached:', roomItems.length); // Debug
+    console.log('Rooms loaded:', roomsFromDatabase.length); // Debug
 }
 
 function getFloorText(floorNumber) {
@@ -1498,8 +1542,12 @@ function openRoomModalFromDatabase(room) {
         bookNowBtn.href = `booking.html?room_type=${encodeURIComponent(roomType)}`;
     }
     
+    // Show modal
     modal.classList.add('active');
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    console.log('Modal opened for room:', room.room_name); // Debug log
 }
 
 function changeModalImageTo(index) {
@@ -1516,11 +1564,13 @@ document.addEventListener('DOMContentLoaded', function() {
         loadRoomsFromDatabase();
     }
     
-    // Close modal handlers
-    const modalClose = document.querySelector('.modal-close');
-    if (modalClose) {
-        modalClose.addEventListener('click', closeRoomModal);
-    }
+    // Close modal handlers - use event delegation for dynamically added elements
+    document.addEventListener('click', function(e) {
+        // Close button click
+        if (e.target.classList.contains('modal-close') || e.target.closest('.modal-close')) {
+            closeRoomModal();
+        }
+    });
 
     // Close modal on background click
     const modal = document.getElementById('roomModal');
@@ -1535,7 +1585,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Keyboard navigation
     document.addEventListener('keydown', function(e) {
         const modal = document.getElementById('roomModal');
-        if (modal && modal.classList.contains('active')) {
+        if (modal && (modal.classList.contains('active') || modal.style.display === 'flex')) {
             if (e.key === 'Escape') {
                 closeRoomModal();
             } else if (e.key === 'ArrowLeft') {
