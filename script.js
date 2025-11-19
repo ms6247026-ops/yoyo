@@ -72,7 +72,8 @@ function checkLoginStatus() {
         
         // Check if we're on dashboard page and initialize dashboard
         if (window.location.pathname.includes('dashboard.html')) {
-            initializeDashboard();
+            // Dashboard has its own initialization script, but we still update navigation
+            // The dashboard.html script will handle the dashboard initialization
         }
     } else {
         // User is not logged in - ensure proper navigation
@@ -109,10 +110,17 @@ function updateNavigationForLoggedInUser() {
             });
         }
         
+        // Add dashboard link if not already added
+        if (!document.getElementById('dashboardNav')) {
+            const dashboardLi = document.createElement('li');
+            dashboardLi.innerHTML = '<a href="dashboard.html" id="dashboardNav"><i class="fas fa-user-circle"></i> My Account</a>';
+            nav.appendChild(dashboardLi);
+        }
+        
         // Add logout functionality if not already added
         if (!document.getElementById('logoutNav')) {
             const logoutLi = document.createElement('li');
-            logoutLi.innerHTML = '<a href="#" id="logoutNav">Logout</a>';
+            logoutLi.innerHTML = '<a href="#" id="logoutNav"><i class="fas fa-sign-out-alt"></i> Logout</a>';
             nav.appendChild(logoutLi);
             
             // Add logout event listener
@@ -137,6 +145,12 @@ function updateNavigationForLoggedOutUser() {
         }
         if (registerLink) {
             registerLink.parentElement.style.display = 'block';
+        }
+        
+        // Remove dashboard link if it exists
+        const dashboardNav = document.getElementById('dashboardNav');
+        if (dashboardNav) {
+            dashboardNav.parentElement.remove();
         }
         
         // Remove logout link if it exists
@@ -172,13 +186,34 @@ async function logoutUser() {
     }
 }
 
-// Booking form functionality (for contact.html)
+// Booking form functionality (for contact.html and booking.html)
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.pathname.includes('contact.html')) {
+    if (window.location.pathname.includes('contact.html') || window.location.pathname.includes('booking.html')) {
         // Initialize booking form based on login status
         initializeBookingForm();
         
-        const bookingForm = document.getElementById('bookingForm');
+        // Pre-fill room type from URL parameter (for booking.html)
+        if (window.location.pathname.includes('booking.html')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomType = urlParams.get('room');
+            if (roomType) {
+                const roomTypeSelect = document.getElementById('broomType');
+                if (roomTypeSelect) {
+                    // Map room type keys to display names
+                    const roomTypeMap = {
+                        'deluxe': 'Deluxe Room',
+                        'executive': 'Executive Suite',
+                        'presidential': 'Presidential Suite',
+                        'family': 'Family Room',
+                        'ultra': 'Ultra Luxury Room'
+                    };
+                    const mappedRoomType = roomTypeMap[roomType.toLowerCase()] || roomType;
+                    roomTypeSelect.value = mappedRoomType;
+                }
+            }
+        }
+        
+        const bookingForm = document.getElementById('bookingFormElement') || document.getElementById('bookingForm');
         if (bookingForm) {
             bookingForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -219,53 +254,180 @@ document.addEventListener('DOMContentLoaded', function() {
                         throw new Error('Failed to load rooms');
                     }
                     
-                    // Find the selected room
-                    const selectedRoom = roomsData.data.find(room => room.room_type.toLowerCase() === roomType.toLowerCase());
+                    // Map form room type to database room type
+                    const roomTypeMapping = {
+                        'deluxe room': 'Deluxe',
+                        'executive suite': 'Suite',
+                        'presidential suite': 'Presidential',
+                        'family room': 'Family',
+                        'ultra luxury room': 'Penthouse'
+                    };
+                    
+                    const dbRoomType = roomTypeMapping[roomType.toLowerCase()] || roomType;
+                    
+                    // Find the selected room - try both mapped type and original type
+                    let selectedRoom = roomsData.data.find(room => 
+                        room.room_type.toLowerCase() === dbRoomType.toLowerCase() ||
+                        room.room_type.toLowerCase() === roomType.toLowerCase()
+                    );
+                    
+                    // If still not found, try matching by room_name
                     if (!selectedRoom) {
-                        throw new Error('Selected room type not available');
+                        selectedRoom = roomsData.data.find(room => 
+                            room.room_name.toLowerCase().includes(roomType.toLowerCase()) ||
+                            roomType.toLowerCase().includes(room.room_name.toLowerCase())
+                        );
                     }
                     
-            // Create booking
-            const bookingResponse = await fetch('api/booking.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.id}`
-                },
-                body: JSON.stringify({
-                    room_id: selectedRoom.id,
-                    check_in_date: checkIn,
-                    check_out_date: checkOut,
-                    number_of_guests: parseInt(guests),
-                    special_requests: specialRequests
-                })
-            });
+                    if (!selectedRoom) {
+                        console.error('Available rooms:', roomsData.data);
+                        console.error('Looking for room type:', roomType, 'or', dbRoomType);
+                        const availableTypes = roomsData.data.map(r => `${r.room_name} (${r.room_type})`).join(', ');
+                        throw new Error(`Selected room type "${roomType}" not available. Available rooms: ${availableTypes}`);
+                    }
+                    
+                    // Calculate number of nights
+                    const checkInDate = new Date(checkIn);
+                    const checkOutDate = new Date(checkOut);
+                    const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+                    const totalAmount = parseFloat(selectedRoom.price_per_night) * nights;
+                    
+                    // Create booking first (with pending status)
+                    const bookingResponse = await fetch('api/booking.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user.id}`
+                        },
+                        body: JSON.stringify({
+                            room_id: selectedRoom.id,
+                            check_in_date: checkIn,
+                            check_out_date: checkOut,
+                            number_of_guests: parseInt(guests),
+                            special_requests: specialRequests
+                        })
+                    });
                     
                     const bookingData = await bookingResponse.json();
                     
-                    if (bookingData.success) {
-                        // Update user's booking data in localStorage
-                        const currentBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-                        currentBookings.unshift(bookingData.data); // Add new booking to the beginning
-                        localStorage.setItem('bookings', JSON.stringify(currentBookings));
-                        
-                        // Show success message with option to view bookings
-                        const viewBookings = confirm('Booking successful! Your reservation has been confirmed.\n\nClick OK to view your bookings, or Cancel to stay on this page.');
-                        
-                        if (viewBookings) {
-                            // Redirect to dashboard to view bookings
-                            window.location.href = 'dashboard.html';
-                        } else {
-                            // Reset form and stay on contact page
-                            this.reset();
-                        }
-                    } else {
-                        showErrorMessage('Booking failed: ' + bookingData.error);
+                    if (!bookingData.success) {
+                        throw new Error(bookingData.error || 'Failed to create booking');
                     }
+                    
+                    const bookingId = bookingData.data.id;
+                    
+                    // Create Razorpay order
+                    const paymentResponse = await fetch('api/payment.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user.id}`
+                        },
+                        body: JSON.stringify({
+                            action: 'create_order',
+                            amount: totalAmount,
+                            booking_id: bookingId
+                        })
+                    });
+                    
+                    const paymentData = await paymentResponse.json();
+                    
+                    if (!paymentData.success) {
+                        throw new Error(paymentData.error || 'Failed to create payment order');
+                    }
+                    
+                    // Check if Razorpay is loaded
+                    if (typeof Razorpay === 'undefined') {
+                        throw new Error('Razorpay payment gateway is not loaded. Please refresh the page.');
+                    }
+                    
+                    // Initialize Razorpay checkout
+                    const options = {
+                        key: paymentData.data.key_id,
+                        amount: Math.round(paymentData.data.amount * 100), // Convert to paise
+                        currency: paymentData.data.currency,
+                        order_id: paymentData.data.order_id,
+                        name: 'Next Inn',
+                        description: `Booking for ${selectedRoom.room_name} - ${nights} night(s)`,
+                        prefill: {
+                            name: `${user.first_name} ${user.last_name}`,
+                            email: user.email,
+                            contact: user.phone
+                        },
+                        theme: {
+                            color: '#3498db'
+                        },
+                        handler: async function(response) {
+                            // Payment successful - verify payment
+                            try {
+                                const verifyResponse = await fetch('api/payment.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${user.id}`
+                                    },
+                                    body: JSON.stringify({
+                                        action: 'verify_payment',
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        booking_id: bookingId
+                                    })
+                                });
+                                
+                                const verifyData = await verifyResponse.json();
+                                
+                                if (verifyData.success) {
+                                    // Update user's booking data in localStorage
+                                    const currentBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                                    // Reload bookings to get updated status
+                                    const updatedBookingsResponse = await fetch('api/booking.php', {
+                                        headers: {
+                                            'Authorization': `Bearer ${user.id}`
+                                        }
+                                    });
+                                    const updatedBookings = await updatedBookingsResponse.json();
+                                    if (updatedBookings.success) {
+                                        localStorage.setItem('bookings', JSON.stringify(updatedBookings.data));
+                                    }
+                                    
+                                    // Show success message
+                                    showSuccessMessage('Payment successful! Your booking has been confirmed.');
+                                    
+                                    setTimeout(() => {
+                                        const viewBookings = confirm('Booking confirmed! Click OK to view your bookings.');
+                                        if (viewBookings) {
+                                            window.location.href = 'dashboard.html';
+                                        } else {
+                                            this.reset();
+                                        }
+                                    }, 1000);
+                                } else {
+                                    throw new Error(verifyData.error || 'Payment verification failed');
+                                }
+                            } catch (error) {
+                                console.error('Payment verification error:', error);
+                                console.error('Error details:', error.message);
+                                showErrorMessage('Payment successful but verification failed: ' + (error.message || 'Unknown error') + '. Please contact support with your payment ID.');
+                            }
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                // User closed the payment modal
+                                showErrorMessage('Payment cancelled. Your booking is pending payment.');
+                            }
+                        }
+                    };
+                    
+                    const razorpay = new Razorpay(options);
+                    razorpay.open();
+                    
+                    // Update button text back
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 } catch (error) {
                     console.error('Booking error:', error);
-                    alert('Booking failed. Please try again later.');
-                } finally {
+                    showErrorMessage(error.message || 'Booking failed. Please try again later.');
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 }
@@ -629,7 +791,7 @@ function initializeBookingForm() {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const userInfoDisplay = document.getElementById('userInfoDisplay');
     const loginRequired = document.getElementById('loginRequired');
-    const bookingForm = document.getElementById('bookingForm');
+    const bookingForm = document.getElementById('bookingForm') || document.querySelector('.booking-form-container');
     
     if (user) {
         // User is logged in - show user info and booking form
@@ -667,18 +829,42 @@ function initializeBookingForm() {
 function initializeDashboard() {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     
-    if (user) {
+    if (!user) {
+        // Redirect to login if not logged in
+        alert('Please login to access your account');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    try {
         // Populate user information
-        document.getElementById('userName').textContent = `${user.first_name} ${user.last_name}`;
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('userPhone').textContent = user.phone;
-        document.getElementById('userCountry').textContent = user.country;
+        const userNameEl = document.getElementById('userName');
+        const userFirstNameEl = document.getElementById('userFirstName');
+        const userEmailEl = document.getElementById('userEmail');
+        const userPhoneEl = document.getElementById('userPhone');
+        const userCountryEl = document.getElementById('userCountry');
+        
+        if (userNameEl) {
+            userNameEl.textContent = `${user.first_name} ${user.last_name}`;
+        }
+        if (userFirstNameEl) {
+            userFirstNameEl.textContent = user.first_name;
+        }
+        if (userEmailEl) {
+            userEmailEl.textContent = user.email;
+        }
+        if (userPhoneEl) {
+            userPhoneEl.textContent = user.phone || 'N/A';
+        }
+        if (userCountryEl) {
+            userCountryEl.textContent = user.country || 'N/A';
+        }
         
         // Load bookings
         loadUserBookings();
-    } else {
-        // Redirect to login if not logged in
-        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Dashboard initialization error:', error);
+        alert('Error loading dashboard. Please refresh the page.');
     }
 }
 
@@ -1090,6 +1276,12 @@ function openRoomModal(roomType) {
         `<img src="${img}" alt="Room Image ${index + 1}" class="modal-thumbnail ${index === 0 ? 'active' : ''}" onclick="selectModalImage(${index})">`
     ).join('');
 
+    // Set Book Now button link with room type parameter
+    const bookNowBtn = document.getElementById('bookNowBtn');
+    if (bookNowBtn) {
+        bookNowBtn.href = `booking.html?room=${roomType}`;
+    }
+
     // Show modal
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1145,17 +1337,185 @@ function updateModalImage() {
     }, 150);
 }
 
-// Initialize rooms page
-document.addEventListener('DOMContentLoaded', function() {
+// Load rooms from database
+let roomsFromDatabase = [];
+
+async function loadRoomsFromDatabase() {
+    try {
+        const response = await fetch('api/rooms.php');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            roomsFromDatabase = data.data;
+            displayRooms(roomsFromDatabase);
+        } else {
+            console.error('Failed to load rooms:', data.error);
+            document.getElementById('roomsGrid').innerHTML = 
+                '<div class="error-message" style="text-align: center; padding: 40px; color: #e74c3c;"><p>Failed to load rooms. Please try again later.</p></div>';
+        }
+    } catch (error) {
+        console.error('Error loading rooms:', error);
+        document.getElementById('roomsGrid').innerHTML = 
+            '<div class="error-message" style="text-align: center; padding: 40px; color: #e74c3c;"><p>Error loading rooms. Please refresh the page.</p></div>';
+    }
+}
+
+function displayRooms(rooms) {
+    const roomsGrid = document.getElementById('roomsGrid');
+    
+    if (!rooms || rooms.length === 0) {
+        roomsGrid.innerHTML = '<div class="no-rooms" style="text-align: center; padding: 40px; color: #666;"><p>No rooms available at the moment.</p></div>';
+        return;
+    }
+    
+    roomsGrid.innerHTML = rooms.map(room => {
+        const imageUrl = room.image_url || 'images/default-room.jpg';
+        const floorText = getFloorText(room.floor_number);
+        const price = parseFloat(room.price_per_night || 0).toLocaleString('en-IN');
+        
+        return `
+            <div class="room-item" data-room-id="${room.id}">
+                <div class="room-item-image">
+                    <img src="${imageUrl}" alt="${room.room_name}" onerror="this.src='images/default-room.jpg'">
+                    <div class="room-overlay">
+                        <span class="view-gallery-btn"><i class="fas fa-images"></i> View Gallery</span>
+                    </div>
+                </div>
+                <div class="room-item-info">
+                    <h3>${room.room_name || 'Room'}</h3>
+                    <p class="room-floor">${floorText}</p>
+                    <p class="room-price">₹${price} <span>/ night</span></p>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
     // Add click handlers to room items
     const roomItems = document.querySelectorAll('.room-item');
     roomItems.forEach(item => {
         item.addEventListener('click', function() {
-            const roomType = this.getAttribute('data-room');
-            openRoomModal(roomType);
+            const roomId = parseInt(this.getAttribute('data-room-id'));
+            const room = roomsFromDatabase.find(r => r.id === roomId);
+            if (room) {
+                openRoomModalFromDatabase(room);
+            }
         });
     });
+}
 
+function getFloorText(floorNumber) {
+    const floor = parseInt(floorNumber);
+    if (isNaN(floor)) return 'Floor N/A';
+    
+    const suffix = floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th';
+    return `${floor}${suffix} Floor`;
+}
+
+function openRoomModalFromDatabase(room) {
+    const modal = document.getElementById('roomModal');
+    if (!modal) return;
+    
+    // Parse amenities from comma-separated string
+    const amenitiesList = room.amenities ? room.amenities.split(',').map(a => a.trim()).filter(a => a) : [];
+    
+    // Create images array - use image_url as primary, add default images if needed
+    const images = [];
+    if (room.image_url) {
+        images.push(room.image_url);
+    }
+    // Add some default images if only one image is available
+    if (images.length === 1) {
+        images.push('images/beach.jpg', 'images/pool.jpg', 'images/dining.jpg');
+    }
+    if (images.length === 0) {
+        images.push('images/default-room.jpg', 'images/beach.jpg', 'images/pool.jpg');
+    }
+    
+    currentRoomImages = images;
+    currentImageIndex = 0;
+    
+    // Set main image
+    document.getElementById('modalMainImage').src = images[0];
+    document.getElementById('modalRoomName').textContent = room.room_name || 'Room';
+    document.getElementById('modalFloor').textContent = getFloorText(room.floor_number);
+    document.getElementById('modalDescription').textContent = room.description || 'No description available.';
+    document.getElementById('modalPrice').innerHTML = `₹${parseFloat(room.price_per_night || 0).toLocaleString('en-IN')}<span>/ night</span>`;
+    document.getElementById('currentImage').textContent = '1';
+    document.getElementById('totalImages').textContent = images.length;
+    
+    // Set amenities
+    const amenitiesContainer = document.getElementById('modalAmenities');
+    if (amenitiesList.length > 0) {
+        // Map common amenity names to icons
+        const amenityIcons = {
+            'wifi': 'fas fa-wifi',
+            'wi-fi': 'fas fa-wifi',
+            'air conditioning': 'fas fa-snowflake',
+            'mini bar': 'fas fa-wine-glass-alt',
+            'ocean view': 'fas fa-water',
+            'balcony': 'fas fa-home',
+            'living room': 'fas fa-couch',
+            'kitchen': 'fas fa-utensils',
+            'kitchenette': 'fas fa-utensils',
+            'pool': 'fas fa-swimming-pool',
+            'tv': 'fas fa-tv',
+            'smart tv': 'fas fa-tv',
+            'butler': 'fas fa-concierge-bell',
+            'spa': 'fas fa-spa',
+            'terrace': 'fas fa-home',
+            'pool access': 'fas fa-swimming-pool'
+        };
+        
+        const amenitiesHTML = amenitiesList.map(amenity => {
+            const amenityLower = amenity.toLowerCase();
+            let icon = 'fas fa-check-circle'; // Default icon
+            for (const [key, iconClass] of Object.entries(amenityIcons)) {
+                if (amenityLower.includes(key)) {
+                    icon = iconClass;
+                    break;
+                }
+            }
+            return `<li><i class="${icon}"></i><span>${amenity}</span></li>`;
+        }).join('');
+        
+        amenitiesContainer.innerHTML = '<h3><i class="fas fa-star"></i> Premium Amenities</h3><ul>' + amenitiesHTML + '</ul>';
+    } else {
+        amenitiesContainer.innerHTML = '<h3><i class="fas fa-star"></i> Premium Amenities</h3><ul><li><i class="fas fa-check-circle"></i><span>Standard amenities included</span></li></ul>';
+    }
+    
+    // Set thumbnails
+    const thumbnailsContainer = document.getElementById('modalThumbnails');
+    thumbnailsContainer.innerHTML = images.map((img, index) => 
+        `<div class="modal-thumbnail ${index === 0 ? 'active' : ''}" onclick="changeModalImageTo(${index})">
+            <img src="${img}" alt="Room Image ${index + 1}" onerror="this.src='images/default-room.jpg'">
+        </div>`
+    ).join('');
+    
+    // Update Book Now button with room type
+    const bookNowBtn = document.getElementById('bookNowBtn');
+    if (bookNowBtn) {
+        const roomType = room.room_type || room.room_name;
+        bookNowBtn.href = `booking.html?room_type=${encodeURIComponent(roomType)}`;
+    }
+    
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+}
+
+function changeModalImageTo(index) {
+    if (index >= 0 && index < currentRoomImages.length) {
+        currentImageIndex = index;
+        updateModalImage();
+    }
+}
+
+// Initialize rooms page
+document.addEventListener('DOMContentLoaded', function() {
+    // Load rooms from database if on rooms page
+    if (document.getElementById('roomsGrid')) {
+        loadRoomsFromDatabase();
+    }
+    
     // Close modal handlers
     const modalClose = document.querySelector('.modal-close');
     if (modalClose) {

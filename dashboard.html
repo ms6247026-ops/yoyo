@@ -26,6 +26,7 @@
                 <li><a href="register.html">Register</a></li>
             </ul>
         </nav>
+        <!-- Navigation will be updated by script.js when user logs in -->
     </header>
 
     <main class="dashboard-main">
@@ -160,7 +161,7 @@
         </div>
     </footer>
 
-    <script src="script.js?v=2.0"></script>
+    <script src="script.js?v=2.1"></script>
     <script>
         let allBookings = [];
         let currentFilter = 'all';
@@ -233,7 +234,17 @@
 
         async function loadBookings() {
             try {
-                const response = await fetch('api/booking.php');
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                const response = await fetch('api/booking.php', {
+                    headers: {
+                        'Authorization': `Bearer ${user.id}`
+                    }
+                });
                 const data = await response.json();
                 
                 if (data.success && data.data.length > 0) {

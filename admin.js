@@ -59,6 +59,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Cancel button handler for room form
+    const cancelRoomBtn = document.getElementById('cancelRoomBtn');
+    if (cancelRoomBtn) {
+        cancelRoomBtn.addEventListener('click', function() {
+            const modal = document.getElementById('roomModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
 
     // Add room button
     const addRoomBtn = document.getElementById('addRoomBtn');
@@ -149,8 +160,8 @@ async function loadDashboardStats() {
         const usersResponse = await fetch('api/admin/users.php');
         const usersData = await usersResponse.json();
         
-        // Load rooms
-        const roomsResponse = await fetch('api/rooms.php');
+        // Load rooms (use admin API to get all rooms)
+        const roomsResponse = await fetch('api/admin/rooms.php');
         const roomsData = await roomsResponse.json();
 
         if (bookingsData.success) {
@@ -317,32 +328,38 @@ async function loadAllUsers() {
 // Load All Rooms
 async function loadAllRooms() {
     try {
-        const response = await fetch('api/rooms.php');
+        // Use admin rooms API to get ALL rooms (including unavailable ones)
+        const response = await fetch('api/admin/rooms.php');
         const data = await response.json();
         
         const tbody = document.getElementById('roomsTableBody');
 
         if (data.success && data.data) {
-            if (data.data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="no-data">No rooms found</td></tr>';
+            const rooms = data.data;
+            
+            if (rooms.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data">No rooms found. Click "Add New Room" to create one.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.data.map(room => {
+            tbody.innerHTML = rooms.map(room => {
+                const availabilityStatus = room.is_available === 1 || room.is_available === true ? 'Available' : 'Unavailable';
+                const statusClass = room.is_available === 1 || room.is_available === true ? 'confirmed' : 'cancelled';
+                
                 return `
                     <tr>
                         <td>${room.id}</td>
-                        <td>${room.room_name}</td>
-                        <td>${room.room_type}</td>
-                        <td>${room.floor_number}</td>
+                        <td>${room.room_name || 'N/A'}</td>
+                        <td>${room.room_type || 'N/A'}</td>
+                        <td>${room.floor_number || 'N/A'}</td>
                         <td>₹${parseFloat(room.price_per_night || 0).toFixed(2)}</td>
-                        <td>${room.max_occupancy}</td>
-                        <td><span class="status ${room.is_available ? 'confirmed' : 'cancelled'}">${room.is_available ? 'Available' : 'Unavailable'}</span></td>
+                        <td>${room.max_occupancy || 'N/A'}</td>
+                        <td><span class="status ${statusClass}">${availabilityStatus}</span></td>
                         <td>
-                            <button class="btn-small" onclick="editRoom(${room.id})">
+                            <button class="btn-small" onclick="editRoom(${room.id})" title="Edit Room">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn-small btn-danger" onclick="deleteRoom(${room.id})">
+                            <button class="btn-small btn-danger" onclick="deleteRoom(${room.id})" title="Delete Room">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -350,12 +367,12 @@ async function loadAllRooms() {
                 `;
             }).join('');
         } else {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No rooms found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No rooms found. Click "Add New Room" to create one.</td></tr>';
         }
     } catch (error) {
         console.error('Error loading rooms:', error);
         document.getElementById('roomsTableBody').innerHTML = 
-            '<tr><td colspan="8" class="error">Error loading rooms</td></tr>';
+            '<tr><td colspan="8" class="error">Error loading rooms: ' + error.message + '</td></tr>';
     }
 }
 
@@ -539,12 +556,18 @@ function openRoomModal(roomId = null) {
 
 async function loadRoomData(roomId) {
     try {
-        const response = await fetch(`api/rooms.php?id=${roomId}`);
+        // Use admin rooms API to get room data
+        const response = await fetch(`api/admin/rooms.php?id=${roomId}`);
         const data = await response.json();
+        
+        console.log('Room data response:', data); // Debug log
         
         if (data.success && data.data) {
             const room = data.data;
-            document.getElementById('roomId').value = room.id;
+            console.log('Room data:', room); // Debug log
+            
+            // Populate form fields
+            document.getElementById('roomId').value = room.id || '';
             document.getElementById('roomName').value = room.room_name || '';
             document.getElementById('roomType').value = room.room_type || '';
             document.getElementById('floorNumber').value = room.floor_number || '';
@@ -553,10 +576,19 @@ async function loadRoomData(roomId) {
             document.getElementById('roomDescription').value = room.description || '';
             document.getElementById('roomAmenities').value = room.amenities || '';
             document.getElementById('roomImageUrl').value = room.image_url || '';
-            document.getElementById('roomAvailable').checked = room.is_available !== false;
+            
+            // Handle is_available - can be 1/0 or true/false
+            const isAvailable = room.is_available === 1 || room.is_available === true || room.is_available === '1';
+            document.getElementById('roomAvailable').checked = isAvailable;
+            
+            console.log('Form populated successfully'); // Debug log
+        } else {
+            console.error('Failed to load room data:', data.error || 'Unknown error');
+            alert('Failed to load room data: ' + (data.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error loading room:', error);
+        alert('Error loading room data: ' + error.message);
     }
 }
 
@@ -586,6 +618,14 @@ async function saveRoom() {
             body: JSON.stringify(roomData)
         });
 
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            throw new Error('Server returned invalid response. Please check server logs.');
+        }
+
         const data = await response.json();
         
         if (data.success) {
@@ -594,11 +634,15 @@ async function saveRoom() {
             loadAllRooms();
             loadDashboardStats();
         } else {
-            alert('Failed to save room: ' + data.error);
+            alert('Failed to save room: ' + (data.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving room:', error);
-        alert('Failed to save room. Please try again.');
+        if (error.message.includes('JSON')) {
+            alert('Server error: Invalid response format. Please check server configuration.');
+        } else {
+            alert('Failed to save room: ' + error.message);
+        }
     }
 }
 

@@ -24,6 +24,9 @@ error_log
 .env
 .env.local
 
+# Razorpay keys (keep keys secure - add your actual keys here)
+# config/razorpay.php
+
 # Composer (if you use it)
 vendor/
 composer.lock

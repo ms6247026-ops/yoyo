@@ -98,9 +98,15 @@ try {
             }
 
             // Check for conflicting bookings
+            // Only check for confirmed bookings, and pending bookings from other users
+            // Allow users to replace their own pending bookings (in case payment failed and they're retrying)
+            // Also exclude pending bookings older than 30 minutes (likely abandoned)
             $query = "SELECT id FROM bookings 
                       WHERE room_id = :room_id 
-                      AND booking_status IN ('pending', 'confirmed')
+                      AND (
+                          booking_status = 'confirmed' OR
+                          (booking_status = 'pending' AND user_id != :user_id AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE))
+                      )
                       AND (
                           (check_in_date <= :check_in AND check_out_date > :check_in) OR
                           (check_in_date < :check_out AND check_out_date >= :check_out) OR
@@ -108,6 +114,7 @@ try {
                       )";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':room_id', $room_id);
+            $stmt->bindParam(':user_id', $user_id);
             $stmt->bindParam(':check_in', $check_in_date);
             $stmt->bindParam(':check_out', $check_out_date);
             $stmt->execute();
@@ -115,14 +122,32 @@ try {
             if ($stmt->rowCount() > 0) {
                 send_error_response('Room is not available for the selected dates');
             }
+            
+            // Cancel any existing pending bookings for the same user, room, and dates (allow retry)
+            $cancelQuery = "UPDATE bookings 
+                           SET booking_status = 'cancelled' 
+                           WHERE room_id = :room_id 
+                           AND user_id = :user_id 
+                           AND booking_status = 'pending'
+                           AND (
+                               (check_in_date <= :check_in AND check_out_date > :check_in) OR
+                               (check_in_date < :check_out AND check_out_date >= :check_out) OR
+                               (check_in_date >= :check_in AND check_out_date <= :check_out)
+                           )";
+            $cancelStmt = $db->prepare($cancelQuery);
+            $cancelStmt->bindParam(':room_id', $room_id);
+            $cancelStmt->bindParam(':user_id', $user_id);
+            $cancelStmt->bindParam(':check_in', $check_in_date);
+            $cancelStmt->bindParam(':check_out', $check_out_date);
+            $cancelStmt->execute();
 
             // Calculate total amount
             $nights = $check_in->diff($check_out)->days;
             $total_amount = $room['price_per_night'] * $nights;
 
-            // Create booking
-            $query = "INSERT INTO bookings (user_id, room_id, check_in_date, check_out_date, number_of_guests, total_amount, special_requests) 
-                      VALUES (:user_id, :room_id, :check_in_date, :check_out_date, :number_of_guests, :total_amount, :special_requests)";
+            // Create booking with pending status (will be confirmed after payment)
+            $query = "INSERT INTO bookings (user_id, room_id, check_in_date, check_out_date, number_of_guests, total_amount, special_requests, booking_status) 
+                      VALUES (:user_id, :room_id, :check_in_date, :check_out_date, :number_of_guests, :total_amount, :special_requests, 'pending')";
             
             $stmt = $db->prepare($query);
             $stmt->bindParam(':user_id', $user_id);

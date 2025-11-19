@@ -80,10 +80,34 @@ nav ul li a {
     color: var(--dark-color);
     font-weight: 600;
     transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+nav ul li a i {
+    font-size: 0.9rem;
 }
 
 nav ul li a:hover, nav ul li a.active {
     color: var(--secondary-color);
+}
+
+#dashboardNav {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+#dashboardNav:hover {
+    color: var(--accent-color);
+}
+
+#logoutNav {
+    color: var(--accent-color);
+}
+
+#logoutNav:hover {
+    color: #c0392b;
 }
 
 /* Hero Section */
@@ -4118,6 +4142,221 @@ footer::before {
         font-size: 28px;
     }
     
+    /* Booking Page Styles */
+    .booking-main {
+        padding-top: 100px;
+    }
+
+    .booking-hero {
+        height: 300px;
+        background: linear-gradient(rgba(44, 62, 80, 0.7), rgba(44, 62, 80, 0.7)), url('images/beach.jpg');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
+    }
+
+    .booking-hero-content h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .booking-hero-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .booking-content-wrapper {
+        padding: 60px 10%;
+        background-color: #fff;
+    }
+
+    .booking-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .booking-form-container {
+        background: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        border-top: 3px solid var(--primary-color);
+    }
+
+    .booking-form-container h2 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+    }
+
+    .user-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .user-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .user-info-item label {
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+    }
+
+    .user-info-item span {
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .login-prompt-content {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .login-prompt-content i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .login-prompt-content h2 {
+        color: var(--text-color);
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+    }
+
+    .login-prompt-content p {
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .register-link {
+        margin-top: 15px;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .register-link a {
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Booking Summary Styles */
+    .booking-summary {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 24px 0;
+        border: 2px solid #e8e8e8;
+    }
+
+    .booking-summary h3 {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        font-weight: 600;
+        border-bottom: 2px solid #e8e8e8;
+        padding-bottom: 12px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e8e8e8;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-item.total {
+        margin-top: 12px;
+        padding-top: 16px;
+        border-top: 2px solid var(--primary-color);
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .summary-item.total span:last-child {
+        color: var(--accent-color);
+        font-size: 1.4rem;
+    }
+
+    .summary-item span:first-child {
+        color: #555;
+        font-weight: 500;
+    }
+
+    .summary-item span:last-child {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    /* Booking Page Responsive */
+    @media (max-width: 768px) {
+        .booking-hero {
+            height: 250px;
+        }
+        
+        .booking-hero-content h1 {
+            font-size: 2rem;
+        }
+        
+        .booking-hero-content p {
+            font-size: 1rem;
+        }
+        
+        .booking-content-wrapper {
+            padding: 40px 5%;
+        }
+        
+        .booking-form-container {
+            padding: 30px 25px;
+        }
+        
+        .booking-form-container h2 {
+            font-size: 1.5rem;
+        }
+        
+        .user-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .booking-summary {
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-item.total {
+            font-size: 1.1rem;
+        }
+
+        .summary-item.total span:last-child {
+            font-size: 1.3rem;
+        }
+    }
+    
     /* About Page Responsive */
     .about-hero {
         height: 350px;
@@ -4749,6 +4988,11 @@ footer::before {
     position: relative;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes slideUp {
@@ -4820,7 +5064,23 @@ footer::before {
 .form-actions {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 30px;
+    padding: 20px 0;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fff;
+    flex-shrink: 0;
+}
+
+.form-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.form-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Responsive Admin Styles */

@@ -34,75 +34,11 @@
             <p>Each of our rooms is designed to provide the ultimate in comfort and luxury, with stunning ocean views and premium amenities.</p>
         </section>
 
-        <section class="rooms-grid">
-            <div class="room-item" data-room="deluxe">
-                <div class="room-item-image">
-                    <img src="images/deluxe-room.jpg" alt="Deluxe Room">
-                    <div class="room-overlay">
-                        <span class="view-gallery-btn"><i class="fas fa-images"></i> View Gallery</span>
-                    </div>
-                </div>
-                <div class="room-item-info">
-                    <h3>Deluxe Room</h3>
-                    <p class="room-floor">1st Floor</p>
-                    <p class="room-price">₹2,999 <span>/ night</span></p>
-                </div>
-            </div>
-
-            <div class="room-item" data-room="executive">
-                <div class="room-item-image">
-                    <img src="images/executive-suite.jpg" alt="Executive Suite">
-                    <div class="room-overlay">
-                        <span class="view-gallery-btn"><i class="fas fa-images"></i> View Gallery</span>
-                    </div>
-                </div>
-                <div class="room-item-info">
-                    <h3>Executive Suite</h3>
-                    <p class="room-floor">2nd Floor</p>
-                    <p class="room-price">₹3,999 <span>/ night</span></p>
-                </div>
-            </div>
-
-            <div class="room-item" data-room="presidential">
-                <div class="room-item-image">
-                    <img src="images/presidential-suite.jpg" alt="Presidential Suite">
-                    <div class="room-overlay">
-                        <span class="view-gallery-btn"><i class="fas fa-images"></i> View Gallery</span>
-                    </div>
-                </div>
-                <div class="room-item-info">
-                    <h3>Presidential Suite</h3>
-                    <p class="room-floor">3rd Floor</p>
-                    <p class="room-price">₹4,499 <span>/ night</span></p>
-                </div>
-            </div>
-
-            <div class="room-item" data-room="family">
-                <div class="room-item-image">
-                    <img src="images/family-room.jpg" alt="Family Room">
-                    <div class="room-overlay">
-                        <span class="view-gallery-btn"><i class="fas fa-images"></i> View Gallery</span>
-                    </div>
-                </div>
-                <div class="room-item-info">
-                    <h3>Family Room</h3>
-                    <p class="room-floor">4th Floor</p>
-                    <p class="room-price">₹4,999 <span>/ night</span></p>
-                </div>
-            </div>
-
-            <div class="room-item" data-room="ultra">
-                <div class="room-item-image">
-                    <img src="images/ultra-luxury.jpg" alt="Ultra Luxury Room">
-                    <div class="room-overlay">
-                        <span class="view-gallery-btn"><i class="fas fa-images"></i> View Gallery</span>
-                    </div>
-                </div>
-                <div class="room-item-info">
-                    <h3>Ultra Luxury Room</h3>
-                    <p class="room-floor">5th Floor</p>
-                    <p class="room-price">₹5,999 <span>/ night</span></p>
-                </div>
+        <section class="rooms-grid" id="roomsGrid">
+            <!-- Rooms will be loaded dynamically from database -->
+            <div class="loading-message" style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 20px;"></i>
+                <p>Loading rooms...</p>
             </div>
         </section>
     </main>
@@ -136,7 +72,7 @@
                     <div class="modal-amenities" id="modalAmenities"></div>
                     <div class="modal-price-section">
                         <p class="modal-price" id="modalPrice"></p>
-                        <a href="contact.html" class="btn btn-primary">Book Now</a>
+                        <a href="booking.html" class="btn btn-primary" id="bookNowBtn">Book Now</a>
                     </div>
                 </div>
             </div>

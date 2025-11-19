@@ -113,6 +113,16 @@ function logout_user() {
 
 // Response helpers
 function send_json_response($data, $status_code = 200) {
+    // Clean any output buffer
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    
+    // Clear any previous output
+    if (ob_get_contents()) {
+        ob_clean();
+    }
+    
     http_response_code($status_code);
     header('Content-Type: application/json');
     echo json_encode($data);

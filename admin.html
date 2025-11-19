@@ -250,57 +250,59 @@
         <div class="modal-content">
             <span class="modal-close">&times;</span>
             <h2 id="roomModalTitle">Add New Room</h2>
-            <form id="roomForm">
+            <form id="roomForm" style="display: flex; flex-direction: column; height: 100%;">
                 <input type="hidden" id="roomId">
-                <div class="form-group">
-                    <label for="roomName">Room Name</label>
-                    <input type="text" id="roomName" required>
-                </div>
-                <div class="form-group">
-                    <label for="roomType">Room Type</label>
-                    <select id="roomType" required>
-                        <option value="Deluxe">Deluxe</option>
-                        <option value="Suite">Suite</option>
-                        <option value="Family">Family</option>
-                        <option value="Presidential">Presidential</option>
-                        <option value="Penthouse">Penthouse</option>
-                    </select>
-                </div>
-                <div class="form-row">
+                <div style="overflow-y: auto; flex: 1; padding-right: 10px; margin-bottom: 20px;">
                     <div class="form-group">
-                        <label for="floorNumber">Floor Number</label>
-                        <input type="number" id="floorNumber" required>
+                        <label for="roomName">Room Name</label>
+                        <input type="text" id="roomName" required>
                     </div>
                     <div class="form-group">
-                        <label for="pricePerNight">Price per Night</label>
-                        <input type="number" id="pricePerNight" step="0.01" required>
+                        <label for="roomType">Room Type</label>
+                        <select id="roomType" required>
+                            <option value="Deluxe">Deluxe</option>
+                            <option value="Suite">Suite</option>
+                            <option value="Family">Family</option>
+                            <option value="Presidential">Presidential</option>
+                            <option value="Penthouse">Penthouse</option>
+                        </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="maxOccupancy">Max Occupancy</label>
-                    <input type="number" id="maxOccupancy" required>
-                </div>
-                <div class="form-group">
-                    <label for="roomDescription">Description</label>
-                    <textarea id="roomDescription" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="roomAmenities">Amenities (comma separated)</label>
-                    <input type="text" id="roomAmenities" placeholder="WiFi, Air Conditioning, Mini Bar">
-                </div>
-                <div class="form-group">
-                    <label for="roomImageUrl">Image URL</label>
-                    <input type="text" id="roomImageUrl">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="roomAvailable" checked>
-                        Available
-                    </label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="floorNumber">Floor Number</label>
+                            <input type="number" id="floorNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pricePerNight">Price per Night</label>
+                            <input type="number" id="pricePerNight" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxOccupancy">Max Occupancy</label>
+                        <input type="number" id="maxOccupancy" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomDescription">Description</label>
+                        <textarea id="roomDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomAmenities">Amenities (comma separated)</label>
+                        <input type="text" id="roomAmenities" placeholder="WiFi, Air Conditioning, Mini Bar">
+                    </div>
+                    <div class="form-group">
+                        <label for="roomImageUrl">Image URL</label>
+                        <input type="text" id="roomImageUrl">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="roomAvailable" checked>
+                            Available
+                        </label>
+                    </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save Room</button>
-                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveRoomBtn">Save Room</button>
+                    <button type="button" class="btn btn-secondary" id="cancelRoomBtn">Cancel</button>
                 </div>
             </form>
         </div>

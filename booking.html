@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Book a Room - Next Inn</title>
+    <link rel="stylesheet" href="style.css?v=2.1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Next Inn Logo" class="logo">
+            <h1>Next Inn</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="rooms.html">Rooms</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="booking-main">
+        <!-- Hero Section -->
+        <section class="booking-hero">
+            <div class="booking-hero-content">
+                <h1>Book Your Stay</h1>
+                <p>Reserve your perfect room at Next Inn</p>
+            </div>
+        </section>
+
+        <!-- Booking Content -->
+        <section class="booking-content-wrapper">
+            <div class="booking-container">
+                <!-- Login Required Message -->
+                <div id="loginRequired" class="login-prompt" style="display: none;">
+                    <div class="login-prompt-content">
+                        <i class="fas fa-lock"></i>
+                        <h2>Login Required</h2>
+                        <p>Please log in to make a booking</p>
+                        <a href="login.html" class="btn btn-primary">Login</a>
+                        <p class="register-link">Don't have an account? <a href="register.html">Register here</a></p>
+                    </div>
+                </div>
+
+                <!-- User Info Display -->
+                <div id="userInfoDisplay" class="user-info-display" style="display: none;">
+                    <h2>Your Information</h2>
+                    <div class="user-info-grid">
+                        <div class="user-info-item">
+                            <label>Name:</label>
+                            <span id="displayName"></span>
+                        </div>
+                        <div class="user-info-item">
+                            <label>Email:</label>
+                            <span id="displayEmail"></span>
+                        </div>
+                        <div class="user-info-item">
+                            <label>Phone:</label>
+                            <span id="displayPhone"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="booking-form-container" style="display: none;">
+                    <h2>Reservation Details</h2>
+                    <form id="bookingFormElement">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="bcheckIn">
+                                    <i class="fas fa-calendar-check"></i> Check-In Date
+                                </label>
+                                <input type="date" id="bcheckIn" name="checkIn" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="bcheckOut">
+                                    <i class="fas fa-calendar-times"></i> Check-Out Date
+                                </label>
+                                <input type="date" id="bcheckOut" name="checkOut" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="broomType">
+                                    <i class="fas fa-bed"></i> Room Type
+                                </label>
+                                <select id="broomType" name="roomType" required>
+                                    <option value="">Select Room Type</option>
+                                    <option value="Deluxe Room">Deluxe Room</option>
+                                    <option value="Executive Suite">Executive Suite</option>
+                                    <option value="Presidential Suite">Presidential Suite</option>
+                                    <option value="Family Room">Family Room</option>
+                                    <option value="Ultra Luxury Room">Ultra Luxury Room</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="bguests">
+                                    <i class="fas fa-users"></i> Number of Guests
+                                </label>
+                                <select id="bguests" name="guests" required>
+                                    <option value="">Select Guests</option>
+                                    <option value="1">1 Guest</option>
+                                    <option value="2">2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                    <option value="5">5+ Guests</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="specialRequests">
+                                <i class="fas fa-comment-alt"></i> Special Requests (Optional)
+                            </label>
+                            <textarea id="specialRequests" name="specialRequests" rows="4" placeholder="Any special requests or preferences?"></textarea>
+                        </div>
+
+                        <div class="booking-summary" id="bookingSummary" style="display: none;">
+                            <h3>Booking Summary</h3>
+                            <div class="summary-item">
+                                <span>Room:</span>
+                                <span id="summaryRoom"></span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Nights:</span>
+                                <span id="summaryNights"></span>
+                            </div>
+                            <div class="summary-item total">
+                                <span>Total Amount:</span>
+                                <span id="summaryTotal"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-credit-card"></i>
+                            Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-phone"></i> +91 8511402885</p>
+                <p><i class="fas fa-envelope"></i> reservations@nextinn.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="rooms.html">Rooms</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Next Inn. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="script.js?v=2.1"></script>
+</body>
+</html>
+
