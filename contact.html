@@ -19,6 +19,7 @@
                 <li><a href="rooms.html">Rooms</a></li>
                 <li><a href="about.html">About Us</a></li>
                 <li><a href="contact.html" class="active">Contact</a></li>
+                <li><a href="admin.html"><i class="fas fa-shield-alt"></i> Admin</a></li>
                 <li><a href="login.html">Login</a></li>
                 <li><a href="register.html">Register</a></li>
             </ul>
@@ -28,207 +29,108 @@
     <main class="contact-main">
         <!-- Hero Section -->
         <section class="contact-hero">
-            <div class="hero-content">
-                <h1>Contact Next Inn</h1>
-                <p>We'd love to hear from you and help you plan your perfect stay</p>
+            <div class="contact-hero-content">
+                <h1>Contact Us</h1>
+                <p>We're here to help you plan your perfect stay</p>
             </div>
         </section>
 
         <!-- Main Content -->
-        <section class="contact-content">
-            <div class="container">
-                <!-- Contact Information & Form Row -->
-                <div class="contact-row">
-                    <!-- Contact Information -->
-                    <div class="contact-info-section">
-                        <div class="info-card">
-                            <h2>Get in Touch</h2>
-                            <div class="info-items">
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <h4>Address</h4>
-                                        <p>Beachside Road, Coastal Area<br>Mumbai, Maharashtra 400001</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="fas fa-phone"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <h4>Phone</h4>
-                                        <p>+91 8511402885</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="fas fa-envelope"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <h4>Email</h4>
-                                        <p>reservations@nextinn.com</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-item">
-                                    <div class="info-icon">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <h4>Reception Hours</h4>
-                                        <p>24/7 Available</p>
-                                    </div>
-                                </div>
+        <section class="contact-content-wrapper">
+            <div class="contact-container">
+                <!-- Contact Information -->
+                <div class="contact-info-box">
+                    <h2>Get in Touch</h2>
+                    <div class="contact-info-list">
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
                             </div>
-                            
-                            <!-- Social Links -->
-                            <div class="social-section">
-                                <h3>Follow Us</h3>
-                                <div class="social-links">
-                                    <a href="#" class="social-link facebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </a>
-                                    <a href="#" class="social-link instagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </a>
-                                    <a href="#" class="social-link twitter">
-                                        <i class="fab fa-twitter"></i>
-                                    </a>
-                                    <a href="#" class="social-link linkedin">
-                                        <i class="fab fa-linkedin-in"></i>
-                                    </a>
-                                </div>
+                            <div class="contact-text">
+                                <h3>Address</h3>
+                                <p>Beachside Road, Coastal Area<br>Mumbai, Maharashtra 400001</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Phone</h3>
+                                <p>+91 8511402885</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Email</h3>
+                                <p>reservations@nextinn.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Reception Hours</h3>
+                                <p>24/7 Available</p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Contact Form -->
-                    <div class="contact-form-section">
-                        <div class="form-card">
-                            <h2>Send Us a Message</h2>
-                            <form id="contactForm">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <input type="text" id="name" placeholder="Your Name" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="email" id="email" placeholder="Your Email" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" id="subject" placeholder="Subject">
-                                </div>
-                                <div class="form-group">
-                                    <textarea id="message" placeholder="Your Message" rows="5" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane"></i>
-                                    Send Message
-                                </button>
-                            </form>
+                    
+                    <div class="contact-social">
+                        <h3>Follow Us</h3>
+                        <div class="social-buttons">
+                            <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Booking Section -->
-                <div class="booking-section">
-                    <div class="booking-card">
-                        <div class="booking-header">
-                            <h2>Book Your Stay</h2>
-                            <p>Reserve your perfect room with us</p>
-                        </div>
-                        
-                        <!-- User Info Display (for logged in users) -->
-                        <div id="userInfoDisplay" class="user-info-display" style="display: none;">
-                            <div class="user-info-card">
-                                <h3>Booking for:</h3>
-                                <div class="user-details">
-                                    <div class="user-detail-item">
-                                        <i class="fas fa-user"></i>
-                                        <span id="displayName"></span>
-                                    </div>
-                                    <div class="user-detail-item">
-                                        <i class="fas fa-envelope"></i>
-                                        <span id="displayEmail"></span>
-                                    </div>
-                                    <div class="user-detail-item">
-                                        <i class="fas fa-phone"></i>
-                                        <span id="displayPhone"></span>
-                                    </div>
-                                </div>
+                <!-- Contact Form -->
+                <div class="contact-form-box">
+                    <h2>Send us a message</h2>
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="name">Your Name</label>
+                                <input type="text" id="name" placeholder="Enter your name" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="email">Your Email</label>
+                                <input type="email" id="email" placeholder="Enter your email" required>
                             </div>
                         </div>
-                        
-                        <!-- Login Required Message (for non-logged in users) -->
-                        <div id="loginRequired" class="login-required">
-                            <div class="login-prompt">
-                                <i class="fas fa-lock"></i>
-                                <h3>Login Required</h3>
-                                <p>Please log in to make a booking</p>
-                                <a href="login.html" class="btn btn-secondary">
-                                    <i class="fas fa-sign-in-alt"></i>
-                                    Go to Login
-                                </a>
-                            </div>
+                        <div class="form-field">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" placeholder="What is this regarding?">
                         </div>
-                        
-                        <form id="bookingForm" style="display: none;">
-                            <div class="booking-form-grid">
-                                <div class="form-group">
-                                    <label for="broomType">Room Type</label>
-                                    <select id="broomType" required>
-                                        <option value="">Select Room Type</option>
-                                        <option value="deluxe">Deluxe Room</option>
-                                        <option value="executive">Executive Suite</option>
-                                        <option value="presidential">Presidential Suite</option>
-                                        <option value="family">Family Room</option>
-                                        <option value="ultra">Ultra Luxury Room</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="bcheckIn">Check-in Date</label>
-                                    <input type="date" id="bcheckIn" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="bcheckOut">Check-out Date</label>
-                                    <input type="date" id="bcheckOut" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="bguests">Number of Guests</label>
-                                    <input type="number" id="bguests" min="1" max="6" required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="specialRequests">Special Requests (Optional)</label>
-                                <textarea id="specialRequests" placeholder="Any special requirements or requests..." rows="3"></textarea>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary btn-large">
-                                <i class="fas fa-calendar-check"></i>
-                                Book Now
-                            </button>
-                        </form>
-                    </div>
+                        <div class="form-field">
+                            <label for="message">Your Message</label>
+                            <textarea id="message" placeholder="Tell us how we can help you..." rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Message
+                        </button>
+                    </form>
                 </div>
             </div>
         </section>
 
         <!-- Location Map Section -->
-        <section class="location-section">
-            <div class="container">
-                <div class="location-header">
-                    <h2>Our Location</h2>
-                    <p>Find us in the heart of the coastal area</p>
-                </div>
-                <div class="map-container">
+        <section class="map-section">
+            <div class="map-wrapper">
+                <h2>Our Location</h2>
+                <p>Find us in the heart of the coastal area</p>
+                <div class="map-box">
                     <iframe 
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.741693291768!2d72.8772143153776!3d19.12575575537949!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c97f346053b7%3A0xacf72f56793d190a!2sMumbai%2C%20Maharashtra%2C%20India!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus" 
                         width="100%" 

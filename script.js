@@ -6,10 +6,6 @@ function plusSlides(n) {
     showSlides(slideIndex += n);
 }
 
-function currentSlide(n) {
-    showSlides(slideIndex = n);
-}
-
 function showSlides(n) {
     let i;
     let slides = document.getElementsByClassName("mySlides");
@@ -97,6 +93,13 @@ function updateNavigationForLoggedInUser() {
         }
         if (registerLink) {
             registerLink.parentElement.style.display = 'none';
+        }
+        
+        // Add admin link if not already added
+        if (!document.getElementById('adminNav')) {
+            const adminLi = document.createElement('li');
+            adminLi.innerHTML = '<a href="admin.html" id="adminNav"><i class="fas fa-shield-alt"></i> Admin</a>';
+            nav.appendChild(adminLi);
         }
         
         // Add logout functionality if not already added
@@ -303,45 +306,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
-// User dashboard functionality (for login.html)
-if (window.location.pathname.includes('login.html')) {
-    // This would normally come from a server after login
-    const userData = {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "+1 234 567 8901",
-        bookings: [
-            { id: 1, room: "Deluxe Room", date: "2023-11-15 to 2023-11-18", status: "Confirmed" },
-            { id: 2, room: "Executive Suite", date: "2023-12-20 to 2023-12-25", status: "Confirmed" }
-        ]
-    };
-    
-    function displayUserDashboard() {
-        document.getElementById('userDashboard').style.display = 'block';
-        document.getElementById('loginForm').style.display = 'none';
-        
-        document.getElementById('userName').textContent = userData.name;
-        document.getElementById('userEmail').textContent = userData.email;
-        document.getElementById('userPhone').textContent = userData.phone;
-        
-        const bookingsList = document.getElementById('bookingsList');
-        bookingsList.innerHTML = '';
-        
-        userData.bookings.forEach(booking => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <strong>${booking.room}</strong>
-                <span>${booking.date}</span>
-                <span class="status ${booking.status.toLowerCase()}">${booking.status}</span>
-            `;
-            bookingsList.appendChild(li);
-        });
-    }
-    
-    // For demo, show dashboard when login button is clicked
-    document.getElementById('showDashboard').addEventListener('click', displayUserDashboard);
-}
 
 // Register functionality (for register.html)
 document.addEventListener('DOMContentLoaded', function() {
@@ -747,8 +711,8 @@ function createBookingCard(booking) {
                 <span>${booking.room_type} - Floor ${booking.floor_number}</span>
             </div>
             <div class="detail-item">
-                <i class="fas fa-dollar-sign"></i>
-                <span>$${booking.total_amount}</span>
+                <i class="fas fa-coins"></i>
+                <span>₹${booking.total_amount}</span>
             </div>
         </div>
         ${booking.special_requests ? `<div class="special-requests"><strong>Special Requests:</strong> ${booking.special_requests}</div>` : ''}
@@ -960,3 +924,240 @@ function removeMessage(messageElement) {
         }, 300);
     }
 }
+
+// Room Data
+const roomData = {
+    deluxe: {
+        name: 'Deluxe Room',
+        floor: '1st Floor',
+        description: 'Spacious, modern, and perfect for solo travelers. Contains 4 bedrooms with attached washroom and balcony, living area, kitchen with cutlery, and TV.',
+        price: '₹2,999',
+        images: [
+            'images/deluxe-room.jpg',
+            'images/beach.jpg',
+            'images/pool.jpg',
+            'images/dining.jpg'
+        ],
+        amenities: [
+            { icon: 'fas fa-wifi', text: 'Free Wi-Fi' },
+            { icon: 'fas fa-tv', text: 'Smart TV' },
+            { icon: 'fas fa-utensils', text: 'Kitchenette' },
+            { icon: 'fas fa-swimming-pool', text: 'Pool Access' }
+        ]
+    },
+    executive: {
+        name: 'Executive Suite',
+        floor: '2nd Floor',
+        description: 'Extra comfort with a separate living area and kitchen and 3 bedrooms.',
+        price: '₹3,999',
+        images: [
+            'images/executive-suite.jpg',
+            'images/beach.jpg',
+            'images/pool.jpg',
+            'images/fitness.jpg'
+        ],
+        amenities: [
+            { icon: 'fas fa-wifi', text: 'Free Wi-Fi' },
+            { icon: 'fas fa-tv', text: 'Smart TV' },
+            { icon: 'fas fa-utensils', text: 'Full Kitchen' },
+            { icon: 'fas fa-swimming-pool', text: 'Pool Access' },
+            { icon: 'fas fa-concierge-bell', text: 'Concierge Service' }
+        ]
+    },
+    presidential: {
+        name: 'Presidential Suite',
+        floor: '3rd Floor',
+        description: 'Ultimate luxury with premium amenities, private swimming pool, 2 bedrooms and cozy vibe balcony.',
+        price: '₹4,499',
+        images: [
+            'images/presidential-suite.jpg',
+            'images/penthouse1.jpg',
+            'images/penthouse2.jpg',
+            'images/penthouse3.jpg'
+        ],
+        amenities: [
+            { icon: 'fas fa-wifi', text: 'Free Wi-Fi' },
+            { icon: 'fas fa-tv', text: 'Smart TV' },
+            { icon: 'fas fa-swimming-pool', text: 'Private Pool' },
+            { icon: 'fas fa-spa', text: 'Spa Access' },
+            { icon: 'fas fa-concierge-bell', text: '24/7 Butler' }
+        ]
+    },
+    family: {
+        name: 'Family Room',
+        floor: '4th Floor',
+        description: 'Designed for groups with added convenience and family. 2 bedrooms and 1 family room.',
+        price: '₹4,999',
+        images: [
+            'images/family-room.jpg',
+            'images/beach.jpg',
+            'images/pool.jpg',
+            'images/dining.jpg'
+        ],
+        amenities: [
+            { icon: 'fas fa-wifi', text: 'Free Wi-Fi' },
+            { icon: 'fas fa-tv', text: 'Smart TV' },
+            { icon: 'fas fa-utensils', text: 'Kitchenette' },
+            { icon: 'fas fa-swimming-pool', text: 'Pool Access' },
+            { icon: 'fas fa-child', text: 'Kids Activities' }
+        ]
+    },
+    ultra: {
+        name: 'Ultra Luxury Room',
+        floor: '5th Floor',
+        description: 'Designed for couples or family. 3 rooms with washroom and balcony.',
+        price: '₹5,999',
+        images: [
+            'images/ultra-luxury.jpg',
+            'images/penthouse1.jpg',
+            'images/penthouse2.jpg',
+            'images/penthouse3.jpg'
+        ],
+        amenities: [
+            { icon: 'fas fa-wifi', text: 'Free Wi-Fi' },
+            { icon: 'fas fa-tv', text: 'Smart TV' },
+            { icon: 'fas fa-wine-glass-alt', text: 'Mini Bar' },
+            { icon: 'fas fa-swimming-pool', text: 'Rooftop Pool' },
+            { icon: 'fas fa-spa', text: 'Spa Access' }
+        ]
+    }
+};
+
+// Current modal state
+let currentRoomImages = [];
+let currentImageIndex = 0;
+
+// Open room modal
+function openRoomModal(roomType) {
+    const room = roomData[roomType];
+    if (!room) return;
+
+    const modal = document.getElementById('roomModal');
+    currentRoomImages = room.images;
+    currentImageIndex = 0;
+
+    // Set main image
+    document.getElementById('modalMainImage').src = room.images[0];
+    document.getElementById('modalRoomName').textContent = room.name;
+    document.getElementById('modalFloor').textContent = room.floor;
+    document.getElementById('modalDescription').textContent = room.description;
+    document.getElementById('modalPrice').innerHTML = `${room.price} <span>/ night</span>`;
+    document.getElementById('currentImage').textContent = '1';
+    document.getElementById('totalImages').textContent = room.images.length;
+
+    // Set amenities
+    const amenitiesContainer = document.getElementById('modalAmenities');
+    amenitiesContainer.innerHTML = '<h3><i class="fas fa-star"></i> Premium Amenities</h3><ul>' + room.amenities.map(amenity => 
+        `<li><i class="${amenity.icon}"></i> ${amenity.text}</li>`
+    ).join('') + '</ul>';
+
+    // Set thumbnails
+    const thumbnailsContainer = document.getElementById('modalThumbnails');
+    thumbnailsContainer.innerHTML = room.images.map((img, index) => 
+        `<img src="${img}" alt="Room Image ${index + 1}" class="modal-thumbnail ${index === 0 ? 'active' : ''}" onclick="selectModalImage(${index})">`
+    ).join('');
+
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close room modal
+function closeRoomModal() {
+    const modal = document.getElementById('roomModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Change modal image (navigation)
+function changeModalImage(direction) {
+    currentImageIndex += direction;
+    
+    if (currentImageIndex < 0) {
+        currentImageIndex = currentRoomImages.length - 1;
+    } else if (currentImageIndex >= currentRoomImages.length) {
+        currentImageIndex = 0;
+    }
+
+    updateModalImage();
+}
+
+// Select modal image from thumbnail
+function selectModalImage(index) {
+    currentImageIndex = index;
+    updateModalImage();
+}
+
+// Update modal image display
+function updateModalImage() {
+    const mainImage = document.getElementById('modalMainImage');
+    mainImage.style.opacity = '0';
+    
+    setTimeout(() => {
+        mainImage.src = currentRoomImages[currentImageIndex];
+        mainImage.style.opacity = '1';
+        
+        // Update counter
+        document.getElementById('currentImage').textContent = currentImageIndex + 1;
+        
+        // Update active thumbnail
+        const thumbnails = document.querySelectorAll('.modal-thumbnail');
+        thumbnails.forEach((thumb, index) => {
+            if (index === currentImageIndex) {
+                thumb.classList.add('active');
+            } else {
+                thumb.classList.remove('active');
+            }
+        });
+    }, 150);
+}
+
+// Initialize rooms page
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers to room items
+    const roomItems = document.querySelectorAll('.room-item');
+    roomItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const roomType = this.getAttribute('data-room');
+            openRoomModal(roomType);
+        });
+    });
+
+    // Close modal handlers
+    const modalClose = document.querySelector('.modal-close');
+    if (modalClose) {
+        modalClose.addEventListener('click', closeRoomModal);
+    }
+
+    // Close modal on background click
+    const modal = document.getElementById('roomModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeRoomModal();
+            }
+        });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('roomModal');
+        if (modal && modal.classList.contains('active')) {
+            if (e.key === 'Escape') {
+                closeRoomModal();
+            } else if (e.key === 'ArrowLeft') {
+                changeModalImage(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeModalImage(1);
+            }
+        }
+    });
+});
+
+// Add login-page class to body on login and register pages
+document.addEventListener('DOMContentLoaded', function() {
+    const loginMain = document.querySelector('.login-main');
+    if (loginMain) {
+        document.body.classList.add('login-page');
+    }
+});

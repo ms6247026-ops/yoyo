@@ -66,6 +66,9 @@
                 
                 <div class="dashboard-actions">
                     <button class="btn" onclick="window.location.href='contact.html'">Make New Booking</button>
+                    <button class="btn" onclick="window.location.href='admin.html'" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                        <i class="fas fa-shield-alt"></i> Admin Panel
+                    </button>
                     <button class="btn logout-btn" id="logoutBtn">Log Out</button>
                 </div>
             </div>
@@ -209,7 +212,7 @@
                     </div>
                     <div class="detail-item">
                         <i class="fas fa-dollar-sign"></i>
-                        <span>$${booking.total_amount}</span>
+                        <span>₹${booking.total_amount}</span>
                     </div>
                 </div>
                 ${booking.special_requests ? `<div class="special-requests"><strong>Special Requests:</strong> ${booking.special_requests}</div>` : ''}
