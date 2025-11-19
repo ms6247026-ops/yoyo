@@ -1,37 +1,21 @@
 // Admin Dashboard JavaScript
 
-// Admin credentials (in production, this should be in database)
-const ADMIN_CREDENTIALS = {
-    email: 'admin@gmail.com',
-    password: 'admin123'
-};
-
 // Check admin login status
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if admin is logged in
     const adminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
     
-    if (adminLoggedIn) {
-        showAdminDashboard();
-    } else {
-        showAdminLogin();
+    // Verify admin login - check both localStorage flag and user role
+    if (!adminLoggedIn || !user || user.role !== 'admin') {
+        // Redirect to login page if not logged in as admin
+        alert('Please login as admin to access this page.');
+        window.location.href = 'login.html';
+        return;
     }
 
-    // Admin login form
-    const adminLoginForm = document.getElementById('adminLoginForm');
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-
-            if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-                localStorage.setItem('adminLoggedIn', 'true');
-                showAdminDashboard();
-            } else {
-                alert('Invalid admin credentials!');
-            }
-        });
-    }
+    // Admin is logged in, show dashboard
+    showAdminDashboard();
 
     // Admin logout
     const adminLogout = document.getElementById('adminLogout');
@@ -39,8 +23,19 @@ document.addEventListener('DOMContentLoaded', function() {
         adminLogout.addEventListener('click', function(e) {
             e.preventDefault();
             if (confirm('Are you sure you want to logout?')) {
+                // Clear admin login and user data
                 localStorage.removeItem('adminLoggedIn');
-                showAdminLogin();
+                localStorage.removeItem('user');
+                
+                // Call logout API
+                fetch('api/logout.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }).then(() => {
+                    window.location.href = 'login.html';
+                });
             }
         });
     }
@@ -104,13 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function showAdminLogin() {
-    document.getElementById('adminLoginSection').style.display = 'flex';
-    document.getElementById('adminDashboard').style.display = 'none';
-}
-
 function showAdminDashboard() {
-    document.getElementById('adminLoginSection').style.display = 'none';
+    // Dashboard is already visible, just ensure it's shown and load data
     document.getElementById('adminDashboard').style.display = 'block';
     loadDashboardStats();
     loadAllBookings();

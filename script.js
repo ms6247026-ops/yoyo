@@ -95,11 +95,18 @@ function updateNavigationForLoggedInUser() {
             registerLink.parentElement.style.display = 'none';
         }
         
-        // Add admin link if not already added
-        if (!document.getElementById('adminNav')) {
-            const adminLi = document.createElement('li');
-            adminLi.innerHTML = '<a href="admin.html" id="adminNav"><i class="fas fa-shield-alt"></i> Admin</a>';
-            nav.appendChild(adminLi);
+        // Admin link removed - admin login is now integrated with regular login
+        // Remove any existing admin links from navbar (except on admin.html page itself)
+        const existingAdminLink = document.getElementById('adminNav');
+        if (existingAdminLink) {
+            existingAdminLink.parentElement.remove();
+        }
+        // Remove all admin.html links from navbar (except on admin page)
+        if (!window.location.pathname.includes('admin.html')) {
+            const adminLinks = nav.querySelectorAll('a[href="admin.html"]');
+            adminLinks.forEach(link => {
+                link.parentElement.remove();
+            });
         }
         
         // Add logout functionality if not already added
@@ -141,11 +148,24 @@ function updateNavigationForLoggedOutUser() {
 }
 
 // Logout function
-function logoutUser() {
+async function logoutUser() {
     if (confirm('Are you sure you want to logout?')) {
+        try {
+            // Call logout API
+            await fetch('api/logout.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        } catch (error) {
+            console.error('Logout API error:', error);
+        }
+        
         // Clear localStorage
         localStorage.removeItem('user');
         localStorage.removeItem('bookings');
+        localStorage.removeItem('adminLoggedIn');
         
         // Redirect to home page
         window.location.href = 'index.html';
@@ -288,10 +308,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success) {
                         // Store user data in localStorage for client-side access
                         localStorage.setItem('user', JSON.stringify(data.data.user));
-                        localStorage.setItem('bookings', JSON.stringify(data.data.bookings));
                         
-                        alert('Login successful! Redirecting to your account...');
-                        window.location.href = 'dashboard.html';
+                        // Check role and redirect accordingly
+                        const role = data.data.role || 'user';
+                        
+                        if (role === 'admin') {
+                            // Store admin login status
+                            localStorage.setItem('adminLoggedIn', 'true');
+                            alert('Admin login successful! Redirecting to admin dashboard...');
+                            window.location.href = 'admin.html';
+                        } else {
+                            // Regular user login
+                            if (data.data.bookings) {
+                                localStorage.setItem('bookings', JSON.stringify(data.data.bookings));
+                            }
+                            alert('Login successful! Redirecting to your account...');
+                            window.location.href = 'dashboard.html';
+                        }
                     } else {
                         alert('Login failed: ' + data.error);
                     }
@@ -1041,14 +1074,14 @@ function openRoomModal(roomType) {
     document.getElementById('modalRoomName').textContent = room.name;
     document.getElementById('modalFloor').textContent = room.floor;
     document.getElementById('modalDescription').textContent = room.description;
-    document.getElementById('modalPrice').innerHTML = `${room.price} <span>/ night</span>`;
+    document.getElementById('modalPrice').innerHTML = `${room.price}<span>/ night</span>`;
     document.getElementById('currentImage').textContent = '1';
     document.getElementById('totalImages').textContent = room.images.length;
 
     // Set amenities
     const amenitiesContainer = document.getElementById('modalAmenities');
     amenitiesContainer.innerHTML = '<h3><i class="fas fa-star"></i> Premium Amenities</h3><ul>' + room.amenities.map(amenity => 
-        `<li><i class="${amenity.icon}"></i> ${amenity.text}</li>`
+        `<li><i class="${amenity.icon}"></i><span>${amenity.text}</span></li>`
     ).join('') + '</ul>';
 
     // Set thumbnails
@@ -1159,5 +1192,128 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginMain = document.querySelector('.login-main');
     if (loginMain) {
         document.body.classList.add('login-page');
+    }
+});
+
+// Forgot Password functionality
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.pathname.includes('forgot-password.html')) {
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        if (forgotPasswordForm) {
+            forgotPasswordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('forgotEmail').value;
+                const submitBtn = document.getElementById('sendOTPBtn');
+                const originalText = submitBtn.innerHTML;
+                
+                // Show loading state
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('api/forgot-password.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Show success message
+                        document.getElementById('otpSentMessage').style.display = 'block';
+                        forgotPasswordForm.style.display = 'none';
+                        
+                        // Store email in localStorage for reset password page
+                        localStorage.setItem('resetEmail', email);
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Forgot password error:', error);
+                    alert('Failed to send OTP. Please try again later.');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+    }
+});
+
+// Reset Password functionality
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.pathname.includes('reset-password.html')) {
+        // Pre-fill email if available
+        const resetEmail = localStorage.getItem('resetEmail');
+        if (resetEmail) {
+            document.getElementById('resetEmail').value = resetEmail;
+        }
+        
+        const resetPasswordForm = document.getElementById('resetPasswordForm');
+        if (resetPasswordForm) {
+            resetPasswordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('resetEmail').value;
+                const otp = document.getElementById('resetOTP').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // Validate passwords match
+                if (newPassword !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                
+                // Validate password length
+                if (newPassword.length < 8) {
+                    alert('Password must be at least 8 characters long!');
+                    return;
+                }
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                
+                // Show loading state
+                submitBtn.textContent = 'Resetting Password...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('api/reset-password.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            otp: otp,
+                            new_password: newPassword
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Password reset successfully! Redirecting to login page...');
+                        localStorage.removeItem('resetEmail');
+                        window.location.href = 'login.html';
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Reset password error:', error);
+                    alert('Failed to reset password. Please try again later.');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+        }
     }
 });

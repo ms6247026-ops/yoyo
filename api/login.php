@@ -27,7 +27,32 @@ if (!validate_email($email)) {
     send_error_response('Please enter a valid email address');
 }
 
+// Admin credentials
+$admin_email = 'admin@gmail.com';
+$admin_password = 'admin123';
+
 try {
+    // Check if admin login
+    if ($email === $admin_email && $password === $admin_password) {
+        // Admin login successful
+        $admin_data = [
+            'id' => 0,
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'email' => $admin_email,
+            'role' => 'admin'
+        ];
+        
+        // Start session and store admin data
+        login_user(0, $admin_data);
+        
+        send_success_response('Admin login successful!', [
+            'user' => $admin_data,
+            'role' => 'admin'
+        ]);
+    }
+
+    // Regular user login
     $database = new Database();
     $db = $database->getConnection();
 
@@ -68,7 +93,8 @@ try {
 
     send_success_response('Login successful!', [
         'user' => $user,
-        'bookings' => $bookings
+        'bookings' => $bookings,
+        'role' => 'user'
     ]);
 
 } catch (PDOException $e) {

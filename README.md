@@ -46,3 +46,4 @@ The database schema is provided in `database.sql`. Import it to set up the requi
 
 This project is for educational purposes.
 
+
