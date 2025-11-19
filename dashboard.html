@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Next Inn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Next Inn Logo" class="logo">
+            <h1>Next Inn</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="rooms.html">Rooms</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="login-main">
+        <section class="login-section">
+            <div class="dashboard-container">
+                <h2>My Account</h2>
+                
+                <div class="user-info">
+                    <h3>Personal Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Name:</label>
+                            <span id="userName"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="userEmail"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone:</label>
+                            <span id="userPhone"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Country:</label>
+                            <span id="userCountry"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>Member Since:</label>
+                            <span id="memberSince"></span>
+                        </div>
+                    </div>
+                    <button class="btn" id="editProfile">Edit Profile</button>
+                </div>
+                
+                <div class="bookings-info">
+                    <h3>My Bookings</h3>
+                    <div id="bookingsContainer">
+                        <div class="loading">Loading bookings...</div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-actions">
+                    <button class="btn" onclick="window.location.href='contact.html'">Make New Booking</button>
+                    <button class="btn logout-btn" id="logoutBtn">Log Out</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-phone"></i> +91 8511402885</p>
+                <p><i class="fas fa-envelope"></i> reservations@nextinn.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="rooms.html">Rooms</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="terms.html">Terms & Conditions</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Next Inn. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user) {
+                alert('Please log in to access your account.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user information
+            document.getElementById('userName').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userPhone').textContent = user.phone;
+            document.getElementById('userCountry').textContent = user.country;
+            
+            // Format member since date
+            const memberSince = new Date(user.created_at);
+            document.getElementById('memberSince').textContent = memberSince.toLocaleDateString();
+
+            // Load bookings
+            loadBookings();
+
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', async function() {
+                try {
+                    const response = await fetch('api/logout.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('bookings');
+                        alert('Logged out successfully!');
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('Logout failed: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Clear local storage anyway
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('bookings');
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+
+        async function loadBookings() {
+            try {
+                const response = await fetch('api/booking.php');
+                const data = await response.json();
+                
+                const bookingsContainer = document.getElementById('bookingsContainer');
+                
+                if (data.success && data.data.length > 0) {
+                    bookingsContainer.innerHTML = '';
+                    
+                    data.data.forEach(booking => {
+                        const bookingCard = createBookingCard(booking);
+                        bookingsContainer.appendChild(bookingCard);
+                    });
+                } else {
+                    bookingsContainer.innerHTML = '<div class="no-bookings">No bookings found. <a href="contact.html">Make your first booking!</a></div>';
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('bookingsContainer').innerHTML = '<div class="error">Failed to load bookings. Please try again later.</div>';
+            }
+        }
+
+        function createBookingCard(booking) {
+            const card = document.createElement('div');
+            card.className = 'booking-card';
+            
+            const checkInDate = new Date(booking.check_in_date);
+            const checkOutDate = new Date(booking.check_out_date);
+            const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+            
+            card.innerHTML = `
+                <div class="booking-header">
+                    <h4>${booking.room_name}</h4>
+                    <span class="status ${booking.booking_status}">${booking.booking_status}</span>
+                </div>
+                <div class="booking-details">
+                    <div class="detail-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>${checkInDate.toLocaleDateString()} - ${checkOutDate.toLocaleDateString()}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-users"></i>
+                        <span>${booking.number_of_guests} guest${booking.number_of_guests > 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-moon"></i>
+                        <span>${nights} night${nights > 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>$${booking.total_amount}</span>
+                    </div>
+                </div>
+                ${booking.special_requests ? `<div class="special-requests"><strong>Special Requests:</strong> ${booking.special_requests}</div>` : ''}
+                <div class="booking-actions">
+                    ${booking.booking_status === 'pending' || booking.booking_status === 'confirmed' ? 
+                        `<button class="btn cancel-btn" onclick="cancelBooking(${booking.id})">Cancel Booking</button>` : 
+                        ''
+                    }
+                </div>
+            `;
+            
+            return card;
+        }
+
+        async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('api/booking.php', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        booking_id: bookingId,
+                        action: 'cancel'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Booking cancelled successfully!');
+                    loadBookings(); // Reload bookings
+                } else {
+                    alert('Failed to cancel booking: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Cancel booking error:', error);
+                alert('Failed to cancel booking. Please try again later.');
+            }
+        }
+    </script>
+</body>
+</html>
